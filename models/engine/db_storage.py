@@ -72,11 +72,12 @@ class DBStorage:
             self.__session.delete(obj)
 
     def reload(self):
+        """reload the session
+        """
         Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine,
-                                       expire_on_commit=False)
-        Session = scoped_session(session_factory)
-        self.__session = Session()
+        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Scope = scoped_session(Session)
+        self.__session = Scope()
 
     def close(self):
         """call remove() method on the private session attribute"""

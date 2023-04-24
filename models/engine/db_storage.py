@@ -62,24 +62,35 @@ class DBStorage:
             return objects
 
     def new(self, obj):
-        self.__session.add(obj)
+        '''adds the obj to the current db session'''
+        if obj is not None:
+            try:
+                self.__session.add(obj)
+                self.__session.flush()
+                self.__session.refresh(obj)
+            except Exception as ex:
+                self.__session.rollback()
+                raise ex
 
     def save(self):
+        '''commit all changes of the current db session'''
         self.__session.commit()
 
     def delete(self, obj=None):
+        ''' deletes from the current databse session the obj
+            is it's not None
+        '''
         if obj is not None:
-            self.__session.delete(obj)
+            self.__session.query(type(obj)).filter(
+                type(obj).id == obj.id).delete()
 
     def reload(self):
-        """reload the session
-        """
+        '''reloads the database'''
         Base.metadata.create_all(self.__engine)
-        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Scope = scoped_session(Session)
-        self.__session = Scope()
+        session_factory = sessionmaker(bind=self.__engine,
+                                       expire_on_commit=False)
+        self.__session = scoped_session(session_factory)()
 
     def close(self):
-        """call remove() method on the private session attribute"""
-        self.__session.__class__.close(self.__session)
-        self.reload()
+        """closes the working SQLAlchemy session"""
+        self.__session.close()

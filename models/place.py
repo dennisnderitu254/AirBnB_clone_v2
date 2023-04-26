@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import Table, ForeignKey
 from os import getenv
 
+
 storage_type = getenv("HBNB_TYPE_STORAGE")
 
 if storage_type == 'db':
@@ -49,7 +50,7 @@ class Place(BaseModel, Base):
         latitude = 0.0
         longitude = 0.0
         amenity_ids = []
-        
+
         @property
         def reviews(self):
             """getter attribute reviews that
